@@ -462,37 +462,6 @@ def fetch_user_top_artists(period='overall', limit=50):
         return []
 
 def fetch_user_top_albums(period='overall', limit=50):
-    try:
-        print(f"Fetching top albums with period={period}, limit={limit}")
-        top_albums = user.get_top_albums(period=period, limit=limit)
-        print(f"Raw top_albums type: {type(top_albums)}")
-        print(f"Length: {len(top_albums)}")
-        if len(top_albums) > 0:
-            print(f"First item: {top_albums[0]}")
-            # Check attributes
-            first = top_albums[0]
-            print(f"Has rank? {hasattr(first, 'rank')}")
-            print(f"Has weight? {hasattr(first, 'weight')}")
-            print(f"Has item? {hasattr(first, 'item')}")
-            if hasattr(first, 'item'):
-                print(f"Item type: {type(first.item)}")
-                print(f"Item attributes: {dir(first.item)}")
-        albums = []
-        for album in top_albums:
-            albums.append({
-                'rank': album.rank if hasattr(album, 'rank') else len(albums)+1,
-                'artist': album.item.artist.name,
-                'name': album.item.name,
-                'playcount': album.weight
-            })
-        return albums
-    except Exception as e:
-        print(f"Error fetching top albums: {e}")
-        import traceback
-        traceback.print_exc()
-        return []
-
-def fetch_user_top_albums(period='overall', limit=50):
     """Fetch user's top albums from Last.fm using pylast"""
     try:
         top_albums = user.get_top_albums(period=period, limit=limit)
@@ -705,7 +674,6 @@ def album_of_the_day():
     # Redirect to the album page (url_for expects artist and album)
     return redirect(url_for('album_page', artist=album['Artist'], album=album['Album']))
 
-@app.route('/top-played')
 @app.route('/top-played')
 def top_played():
     period = request.args.get('period', 'overall')
