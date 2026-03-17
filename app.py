@@ -15,6 +15,7 @@ app = Flask(__name__)
 LASTFM_API_KEY = os.environ.get('LASTFM_API_KEY', '')
 API_SECRET = os.environ.get('API_SECRET', '')
 USERNAME = os.environ.get('LASTFM_USERNAME', '')
+DB_FILE = "music.db"
 # =========================
 
 network = pylast.LastFMNetwork(api_key=LASTFM_API_KEY, api_secret=API_SECRET)
