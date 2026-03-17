@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, redirect, url_for
 import sqlite3
 import json
 import os
@@ -20,6 +20,10 @@ DB_FILE = "music.db"
 
 network = pylast.LastFMNetwork(api_key=LASTFM_API_KEY, api_secret=API_SECRET)
 user = network.get_user(USERNAME)
+
+# Load curated lists from JSON file
+with open('curated_lists.json', 'r', encoding='utf-8') as f:
+    curated_lists = json.load(f)
 
 # ----- Database helpers -----
 def get_db_connection():
@@ -198,7 +202,7 @@ def get_album_info(artist, album):
     conn = get_db_connection()
     # Try exact match first
     cursor = conn.execute('''
-        SELECT Year, Release, HeadGen, Gen1, Gen2, Gen3, Gen4
+        SELECT Year, Release, HeadGen, Gen1, Gen2, Gen3, Gen4, albumReview
         FROM songs
         WHERE Artist = ? AND Album = ?
         LIMIT 1
@@ -210,7 +214,7 @@ def get_album_info(artist, album):
         if norm_artist != artist:
             print(f"Trying normalized artist: {norm_artist}")
             cursor = conn.execute('''
-                SELECT Year, Release, HeadGen, Gen1, Gen2, Gen3, Gen4
+                SELECT Year, Release, HeadGen, Gen1, Gen2, Gen3, Gen4, albumReview
                 FROM songs
                 WHERE Artist = ? AND Album = ?
                 LIMIT 1
@@ -657,6 +661,34 @@ def artist(artist):
 @app.route('/api/now-playing')
 def api_now_playing():
     return jsonify(get_status())
+    
+@app.route('/album-of-the-day')
+def album_of_the_day():
+    conn = get_db_connection()
+    # Get all distinct essential albums, sorted for stable order
+    albums = conn.execute('''
+        SELECT Artist, Album FROM songs
+        WHERE fullAlbum = 'EA'
+        GROUP BY Artist, Album
+        ORDER BY Artist, Album
+    ''').fetchall()
+    conn.close()
+    
+    if not albums:
+        return "No essential albums found", 404
+    
+    # Use current date to compute a deterministic index
+    now = datetime.now()
+    epoch = datetime(2020, 1, 1)  # arbitrary fixed date
+    day_number = (now - epoch).days
+    # Add a year offset so same date in different years yields different index
+    year_offset = now.year * 100
+    total = len(albums)
+    index = (day_number + year_offset) % total
+    album = albums[index]
+    
+    # Redirect to the album page (url_for expects artist and album)
+    return redirect(url_for('album_page', artist=album['Artist'], album=album['Album']))
 
 @app.route('/top-played')
 @app.route('/top-played')
@@ -799,6 +831,31 @@ def playlists():
         "Classical Music", "Blues", "Other", "Funk"
     ]
     return render_template('playlists.html', genres=genres)
+    
+@app.route('/curated')
+def curated_index():
+    """Show list of all curated recommendation posts."""
+    return render_template('curated_index.html', lists=curated_lists)
+
+@app.route('/curated/<slug>')
+def curated_list(slug):
+    """Show albums for a specific curated list."""
+    # Find the list by slug
+    curated = next((item for item in curated_lists if item['slug'] == slug), None)
+    if not curated:
+        return "List not found", 404
+
+    # For each album, get image from database (if exists)
+    albums_with_images = []
+    for artist, album in curated['albums']:
+        album_info = {
+            'Artist': artist,
+            'Album': album,
+            'image': get_album_image(artist, album)
+        }
+        albums_with_images.append(album_info)
+
+    return render_template('curated_list.html', curated=curated, albums=albums_with_images)
 
 @app.route('/playlists/<genre>')
 def playlist_genre(genre):

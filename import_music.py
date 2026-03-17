@@ -2,58 +2,93 @@ import sqlite3
 import pandas as pd
 
 # ===== CONFIGURATION =====
-EXCEL_FILE = "music_librarydb.xlsx"      # <-- change to your actual file name
-SHEET_NAME = 0                            # 0 = first sheet; or put sheet name in quotes
+EXCEL_FILE = "music_librarydb.xlsx"   # your Excel file name
+SHEET_NAME = 0                         # first sheet
 DB_FILE = "music.db"
 TABLE_NAME = "songs"
-# Columns that together uniquely identify a row
-UNIQUE_KEYS = ["Artist", "Album", "Song"]  # composite primary key
-# ==========================
+# Columns from Excel that should be updated (all except dynamic ones)
+EXCEL_COLUMNS = [
+    'Artist', 'Album', 'Song', 'NoteX', 'HeadGen', 'Lan', 'fullAlbum',
+    'Genus Singer', 'Gen1', 'Gen2', 'Gen3', 'Gen4', 'N1', 'N2', 'soft',
+    'P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'rating', 'albumRating', 'Year',
+    'Release', 'essentialArtist', 'extra', 'songReview', 'albumReview',
+    'Bio', 'credits', 'coverTracksDurationURL', 'numScrobblesURL',
+    'BioURL', 'AlbumIDURL', 'creditsURL'
+]
+# Note: 'scrobbles' and 'last_played' are NOT included – they will be preserved.
+# =========================
 
 print("Reading Excel file...")
-df = pd.read_excel(EXCEL_FILE, sheet_name=SHEET_NAME, dtype=str)  # read all as text
-
-# Clean column names (remove extra spaces) – but keep original names otherwise
-df.columns = df.columns.str.strip()
+df = pd.read_excel(EXCEL_FILE, sheet_name=SHEET_NAME, dtype=str)
 
 print(f"Found {len(df)} rows and {len(df.columns)} columns.")
 
-# Connect to SQLite (creates the file if it doesn't exist)
+# Clean column names
+df.columns = df.columns.str.strip()
+
 conn = sqlite3.connect(DB_FILE)
 cursor = conn.cursor()
 
-# Create table if it doesn't exist, with a UNIQUE constraint on the three key columns
-columns = df.columns.tolist()
-# Quote column names to handle spaces or special characters
-columns_definition = ",\n    ".join([f'"{col}" TEXT' for col in columns])
+# Get list of existing columns in the database (to verify)
+cursor.execute(f"PRAGMA table_info({TABLE_NAME})")
+db_columns = [col[1] for col in cursor.fetchall()]
 
-# Add composite unique constraint
-unique_cols = ', '.join([f'"{col}"' for col in UNIQUE_KEYS])
-create_table_sql = f'''
-CREATE TABLE IF NOT EXISTS "{TABLE_NAME}" (
-    {columns_definition},
-    UNIQUE({unique_cols}) ON CONFLICT REPLACE
-);
+# Prepare the update and insert statements
+# Build a list of columns to update (only those present in both Excel and DB)
+update_columns = [col for col in EXCEL_COLUMNS if col in db_columns]
+insert_columns = update_columns.copy()  # same set for insert
+
+# Build SQL snippets
+set_clause = ", ".join([f'"{col}" = ?' for col in update_columns])
+insert_placeholders = ", ".join(["?"] * len(insert_columns))
+quoted_insert_columns = ", ".join([f'"{col}"' for col in insert_columns])
+
+# For each row, we'll first try to update; if no row updated, we insert.
+update_sql = f'''
+    UPDATE "{TABLE_NAME}"
+    SET {set_clause}
+    WHERE Artist = ? AND Album = ? AND Song = ?
 '''
-cursor.execute(create_table_sql)
-print("Table is ready.")
+insert_sql = f'''
+    INSERT INTO "{TABLE_NAME}" ({quoted_insert_columns})
+    VALUES ({insert_placeholders})
+'''
 
-# Prepare the INSERT OR REPLACE statement
-placeholders = ", ".join(["?"] * len(columns))
-quoted_columns = ", ".join([f'"{col}"' for col in columns])
-insert_sql = f'INSERT OR REPLACE INTO "{TABLE_NAME}" ({quoted_columns}) VALUES ({placeholders})'
-
-# Convert DataFrame to list of tuples (rows), replacing NaN with None (SQL NULL)
+# Convert DataFrame to list of tuples, replacing NaN with None
 rows = df.where(pd.notnull(df), None).values.tolist()
 
-# Insert data in batches for speed
-batch_size = 500
-total = len(rows)
-for i in range(0, total, batch_size):
-    batch = rows[i:i+batch_size]
-    cursor.executemany(insert_sql, batch)
-    print(f"Inserted rows {i+1} to {min(i+batch_size, total)}")
+updated_count = 0
+inserted_count = 0
+
+for row in rows:
+    # Extract the key fields (Artist, Album, Song)
+    # row order matches the DataFrame columns
+    # We need to map row values to the correct columns.
+    # Instead of relying on order, let's use a dict for clarity.
+    row_dict = dict(zip(df.columns, row))
+    artist = row_dict.get('Artist')
+    album = row_dict.get('Album')
+    song = row_dict.get('Song')
+    if not artist or not album or not song:
+        print("Skipping row with missing key fields")
+        continue
+
+    # Build list of update values in the same order as update_columns
+    update_values = [row_dict.get(col) for col in update_columns]
+    # Append key fields for WHERE clause
+    update_values.extend([artist, album, song])
+
+    # Try update
+    cursor.execute(update_sql, update_values)
+    if cursor.rowcount > 0:
+        updated_count += 1
+    else:
+        # No existing row – insert new one
+        insert_values = [row_dict.get(col) for col in insert_columns]
+        cursor.execute(insert_sql, insert_values)
+        inserted_count += 1
 
 conn.commit()
 conn.close()
-print(f"Done! Database saved as {DB_FILE}")
+
+print(f"Done. Updated {updated_count} existing rows, inserted {inserted_count} new rows.")

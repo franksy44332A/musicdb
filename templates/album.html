@@ -175,6 +175,28 @@
         margin-top: 2rem;
         box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
+    /* Album Review Section */
+    .album-review {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .review-content {
+        background: #f9fafb;
+        padding: 1.5rem;
+        border-radius: 12px;
+        line-height: 1.6;
+        color: #334155;
+        margin-top: 1rem;
+    }
+    .review-content p:first-child {
+        margin-top: 0;
+    }
+    .review-content p:last-child {
+        margin-bottom: 0;
+    }
     /* External links section */
     .external-links {
         background: white;
@@ -345,6 +367,16 @@
         {% endfor %}
     </div>
     {% endif %}
+</div>
+{% endif %}
+
+<!-- Album Review Section -->
+{% if album.albumReview %}
+<div class="album-review">
+    <h3 style="margin-top: 0; color: #0f172a;">📝 About</h3>
+    <div class="review-content">
+        {{ album.albumReview|safe }}
+    </div>
 </div>
 {% endif %}
 

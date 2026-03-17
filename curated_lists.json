@@ -1,0 +1,16 @@
+[
+	{
+		"slug": "cool-jazz-essentials-2",
+		"title": "Seven Cool Jazz Albums",
+		"description": "A selection of essential cool jazz records.",
+		"albums": [
+			["Gerry Mulligan", "Night Lights"],
+			["Jimmy Giuffre", "Western Suite"],
+			["Bill Evans", "You Must Believe in Spring"],
+			["Chet Baker Quartet", "No Problem"],
+			["Miles Davis", "Blue Moods"],
+			["David Murray", "Ballads"],
+			["Lars Jansson Trio", "A Window Towards Being"]
+		]
+	}
+]

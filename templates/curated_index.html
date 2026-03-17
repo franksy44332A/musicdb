@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Curated Lists{% endblock %}
+
+{% block extra_css %}
+<style>
+    .lists-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+    .list-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 1px solid #e2e8f0;
+    }
+    .list-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px -8px rgba(0,0,0,0.15);
+    }
+    .list-card a {
+        text-decoration: none;
+        color: inherit;
+    }
+    .list-card h2 {
+        margin-top: 0;
+        color: #0f172a;
+        font-size: 1.3rem;
+    }
+    .list-card p {
+        color: #64748b;
+        margin-bottom: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 style="color:#0f172a; margin-bottom: 0.5rem;">Curated Lists</h1>
+<p style="color:#475569; margin-bottom: 2rem;">Hand‑picked album recommendations.</p>
+
+<div class="lists-grid">
+    {% for list in lists %}
+    <div class="list-card">
+        <a href="/curated/{{ list.slug }}">
+            <h2>{{ list.title }}</h2>
+            {% if list.description %}
+            <p>{{ list.description }}</p>
+            {% endif %}
+            <p style="margin-top: 1rem; color:#3b82f6;">{{ list.albums|length }} albums →</p>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

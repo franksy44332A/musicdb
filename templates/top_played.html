@@ -106,8 +106,8 @@
 {% endblock %}
 
 {% block content %}
-<h1 style="color:#0f172a; margin-bottom: 0.5rem;">Your Last.fm Charts</h1>
-<p style="color:#475569; margin-bottom: 2rem;">All‑time stats and recent activity. Click on artist names to see all songs in your collection.</p>
+<h1 style="color:#0f172a; margin-bottom: 0.5rem;">Last.fm Charts</h1>
+<p style="color:#475569; margin-bottom: 2rem;">All‑time stats and recent activity. Click on artist names to see all songs in collection.</p>
 
 <!-- Period selector -->
 <div class="period-selector">
@@ -120,6 +120,31 @@
         <option value="6month" {% if period=='6month' %}selected{% endif %}>Last 6 months</option>
         <option value="12month" {% if period=='12month' %}selected{% endif %}>Last 12 months</option>
     </select>
+</div>
+
+<!-- Recent Tracks -->
+<div class="section-card">
+    <h2 class="section-title">⏱️ Recent Tracks</h2>
+    <table id="recentTable" class="display">
+        <thead>
+            <tr>
+                <th>Artist</th>
+                <th>Track</th>
+                <th>Played At</th>
+                <th>Now</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for track in recent %}
+            <tr>
+                <td><a href="/artist/{{ track.artist|urlencode }}" class="artist-link">{{ track.artist }}</a></td>
+                <td><a href="/album/{{ track.artist|urlencode }}/{{ track.name|urlencode }}" class="album-link">{{ track.name }}</a></td>
+                <td>{{ track.played_at }}</td>
+                <td>{% if track.now_playing %}▶{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 
 <!-- Top Artists -->
@@ -195,30 +220,6 @@
     </table>
 </div>
 
-<!-- Recent Tracks -->
-<div class="section-card">
-    <h2 class="section-title">⏱️ Recent Tracks</h2>
-    <table id="recentTable" class="display">
-        <thead>
-            <tr>
-                <th>Artist</th>
-                <th>Track</th>
-                <th>Played At</th>
-                <th>Now</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for track in recent %}
-            <tr>
-                <td><a href="/artist/{{ track.artist|urlencode }}" class="artist-link">{{ track.artist }}</a></td>
-                <td><a href="/album/{{ track.artist|urlencode }}/{{ track.name|urlencode }}" class="album-link">{{ track.name }}</a></td>
-                <td>{{ track.played_at }}</td>
-                <td>{% if track.now_playing %}▶{% endif %}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
 {% endblock %}
 
 {% block extra_js %}
