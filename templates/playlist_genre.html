@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}{{ genre }} Playlist{% endblock %}
+
+{% block extra_css %}
+<style>
+    .back-link {
+        margin-bottom: 1em;
+        display: inline-block;
+        color: #3b82f6;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    .back-link:hover {
+        text-decoration: underline;
+    }
+    .album-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+        margin-top: 2rem;
+    }
+    .album-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 15px;
+        text-align: center;
+        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .album-card:hover {
+        transform: scale(1.02);
+        box-shadow: 0 12px 24px -8px rgba(0,0,0,0.15);
+    }
+    .album-card img {
+        width: 140px;
+        height: 140px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .album-card .no-image {
+        width: 140px;
+        height: 140px;
+        background: #f1f5f9;
+        border-radius: 8px;
+        margin: 0 auto 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        font-size: 2rem;
+    }
+    .album-card h3 {
+        font-size: 1.1rem;
+        margin: 8px 0 4px;
+        color: #0f172a;
+    }
+    .album-card h3 a {
+        color: #0f172a;
+        text-decoration: none;
+    }
+    .album-card h3 a:hover {
+        color: #3b82f6;
+        text-decoration: underline;
+    }
+    .album-card .artist {
+        font-size: 0.9rem;
+        color: #64748b;
+        margin: 4px 0;
+    }
+    .album-card .meta {
+        font-size: 0.85rem;
+        color: #475569;
+        margin: 4px 0;
+    }
+    .album-card .rating {
+        font-weight: 600;
+        color: #f59e0b;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<a href="/playlists" class="back-link">← Back to playlists</a>
+
+<h1 style="color:#0f172a; margin-bottom: 0.5rem;">{{ genre }} Essentials</h1>
+<p style="color:#475569; margin-bottom: 2rem;">Essential albums from your collection.</p>
+
+<div class="album-grid">
+    {% for album in albums %}
+    <div class="album-card">
+        {% if album.image %}
+            <img src="{{ album.image }}" alt="{{ album.Album }}" loading="lazy">
+        {% else %}
+            <div class="no-image">📀</div>
+        {% endif %}
+        <h3><a href="/album/{{ album.Artist }}/{{ album.Album }}">{{ album.Album }}</a></h3>
+        <div class="artist">{{ album.Artist }}</div>
+        <div class="meta">{{ album.HeadGen or '' }}</div>
+        <div class="meta">{{ album.Year or 'Unknown' }}</div>
+        {% if album.albumRating %}
+            <div class="rating">★ {{ album.albumRating }}</div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block title %}Top Charts – Last.fm{% endblock %}
+
+{% block extra_css %}
+<!-- DataTables CSS (still used for sorting/pagination) -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<style>
+    body { background: #f8fafc; }
+    .period-selector {
+        margin-bottom: 2rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        display: inline-block;
+    }
+    .period-selector select {
+        padding: 0.5rem 1rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        margin-left: 0.5rem;
+        background: white;
+    }
+    .section-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+        padding: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+    .section-title {
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        color: #0f172a;
+        font-size: 1.5rem;
+        font-weight: 600;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 0.5rem;
+    }
+    /* DataTable wrapper adjustments */
+    .dataTables_wrapper {
+        font-family: 'Inter', sans-serif;
+        width: 100%;
+        overflow-x: auto;
+    }
+    table.dataTable {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 0.9rem;
+    }
+    table.dataTable thead th {
+        background-color: #f1f5f9;
+        color: #1e293b;
+        font-weight: 600;
+        border-bottom: 2px solid #cbd5e1;
+        padding: 12px 8px;
+        white-space: nowrap;
+    }
+    table.dataTable tbody td {
+        padding: 10px 8px;
+        border-bottom: 1px solid #e2e8f0;
+        color: #334155;
+    }
+    table.dataTable tbody tr:hover {
+        background-color: #f1f5f9;
+    }
+    a.artist-link, a.album-link {
+        color: #3b82f6;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    a.artist-link:hover, a.album-link:hover {
+        text-decoration: underline;
+    }
+    .rank-badge {
+        display: inline-block;
+        width: 28px;
+        height: 28px;
+        line-height: 28px;
+        text-align: center;
+        background: #e2e8f0;
+        border-radius: 50%;
+        font-weight: 600;
+        color: #334155;
+        font-size: 0.8rem;
+    }
+    .playcount-badge {
+        background: #e6f3ff;
+        color: #3b82f6;
+        padding: 2px 8px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        display: inline-block;
+    }
+    .now-playing-tag {
+        color: #f97316;
+        font-weight: 600;
+        margin-left: 5px;
+    }
+    /* Hide length menu and search (not needed) */
+    .dataTables_length, .dataTables_filter { display: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 style="color:#0f172a; margin-bottom: 0.5rem;">Your Last.fm Charts</h1>
+<p style="color:#475569; margin-bottom: 2rem;">All‑time stats and recent activity. Click on artist names to see all songs in your collection.</p>
+
+<!-- Period selector -->
+<div class="period-selector">
+    <label for="period">Time period:</label>
+    <select id="period" onchange="window.location.href='?period='+this.value">
+        <option value="overall" {% if period=='overall' %}selected{% endif %}>Overall</option>
+        <option value="7day" {% if period=='7day' %}selected{% endif %}>Last 7 days</option>
+        <option value="1month" {% if period=='1month' %}selected{% endif %}>Last month</option>
+        <option value="3month" {% if period=='3month' %}selected{% endif %}>Last 3 months</option>
+        <option value="6month" {% if period=='6month' %}selected{% endif %}>Last 6 months</option>
+        <option value="12month" {% if period=='12month' %}selected{% endif %}>Last 12 months</option>
+    </select>
+</div>
+
+<!-- Top Artists -->
+<div class="section-card">
+    <h2 class="section-title">🎤 Top Artists</h2>
+    <table id="artistsTable" class="display">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Artist</th>
+                <th>Plays</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for artist in artists %}
+            <tr>
+                <td><span class="rank-badge">{{ artist.rank }}</span></td>
+                <td><a href="/artist/{{ artist.name|urlencode }}" class="artist-link">{{ artist.name }}</a></td>
+                <td><span class="playcount-badge">{{ artist.playcount }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Top Albums -->
+<div class="section-card">
+    <h2 class="section-title">💿 Top Albums</h2>
+    <table id="albumsTable" class="display">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Artist</th>
+                <th>Album</th>
+                <th>Plays</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for album in albums %}
+            <tr>
+                <td><span class="rank-badge">{{ album.rank }}</span></td>
+                <td><a href="/artist/{{ album.artist|urlencode }}" class="artist-link">{{ album.artist }}</a></td>
+                <td><a href="/album/{{ album.artist|urlencode }}/{{ album.name|urlencode }}" class="album-link">{{ album.name }}</a></td>
+                <td><span class="playcount-badge">{{ album.playcount }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Top Tracks -->
+<div class="section-card">
+    <h2 class="section-title">🎵 Top Tracks</h2>
+    <table id="tracksTable" class="display">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Artist</th>
+                <th>Track</th>
+                <th>Plays</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for track in tracks %}
+            <tr>
+                <td><span class="rank-badge">{{ track.rank }}</span></td>
+                <td><a href="/artist/{{ track.artist|urlencode }}" class="artist-link">{{ track.artist }}</a></td>
+                <td><a href="/album/{{ track.artist|urlencode }}/{{ track.name|urlencode }}" class="album-link">{{ track.name }}</a></td>
+                <td><span class="playcount-badge">{{ track.playcount }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Recent Tracks -->
+<div class="section-card">
+    <h2 class="section-title">⏱️ Recent Tracks</h2>
+    <table id="recentTable" class="display">
+        <thead>
+            <tr>
+                <th>Artist</th>
+                <th>Track</th>
+                <th>Played At</th>
+                <th>Now</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for track in recent %}
+            <tr>
+                <td><a href="/artist/{{ track.artist|urlencode }}" class="artist-link">{{ track.artist }}</a></td>
+                <td><a href="/album/{{ track.artist|urlencode }}/{{ track.name|urlencode }}" class="album-link">{{ track.name }}</a></td>
+                <td>{{ track.played_at }}</td>
+                <td>{% if track.now_playing %}▶{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Initialize each table with paging but no length change or search
+    $('#artistsTable').DataTable({
+        paging: true,
+        pageLength: 50,
+        lengthChange: false,
+        searching: false,
+        order: [[0, 'asc']],
+        scrollX: true
+    });
+
+    $('#albumsTable').DataTable({
+        paging: true,
+        pageLength: 50,
+        lengthChange: false,
+        searching: false,
+        order: [[0, 'asc']],
+        scrollX: true
+    });
+
+    $('#tracksTable').DataTable({
+        paging: true,
+        pageLength: 50,
+        lengthChange: false,
+        searching: false,
+        order: [[0, 'asc']],
+        scrollX: true
+    });
+
+    $('#recentTable').DataTable({
+        paging: true,
+        pageLength: 50,
+        lengthChange: false,
+        searching: false,
+        order: [],
+        scrollX: true
+    });
+});
+</script>
+{% endblock %}

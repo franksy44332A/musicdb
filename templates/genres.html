@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Genres{% endblock %}
+
+{% block extra_css %}
+<style>
+    .genre-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+    .genre-card {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 1.5em 1em;
+        text-align: center;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .genre-card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .genre-card a {
+        text-decoration: none;
+        color: #0066cc;
+        font-weight: bold;
+        font-size: 1.1em;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <h1>Genres</h1>
+    <p>Select a genre to browse albums:</p>
+    <div class="genre-grid">
+        {% for genre in genres %}
+        <div class="genre-card">
+            <a href="/genre/{{ genre }}">{{ genre }}</a>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}{{ artist }} - My Music Collection{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Page-specific styles for the artist page */
+    .back-link {
+        margin-bottom: 1em;
+        display: inline-block;
+        color: #3b82f6;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    .back-link:hover {
+        text-decoration: underline;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    th, td {
+        border: 1px solid #e2e8f0;
+        padding: 10px 12px;
+        text-align: left;
+    }
+    th {
+        background-color: #f8fafc;
+        font-weight: 600;
+        color: #1e293b;
+    }
+    td {
+        color: #334155;
+    }
+    tr:hover {
+        background-color: #f1f5f9;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <a href="/" class="back-link">← Back to home</a>
+    <h1>{{ artist }}</h1>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Album</th>
+                <th>Song</th>
+                <th>Year</th>
+                <th>Rating</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for song in songs %}
+            <tr>
+                <td>{{ song.Album }}</td>
+                <td>{{ song.Song }}</td>
+                <td>{{ song.Year }}</td>
+                <td>{{ song.rating }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

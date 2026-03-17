@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}My Music Collection{% endblock %}</title>
+    <!-- Google Fonts (same as home.html) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9eef2 100%);
+            display: flex;
+            min-height: 100vh;
+            color: #1e293b;
+        }
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 2rem 1rem;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+        }
+        .sidebar h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            text-align: center;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #334155;
+            margin-bottom: 2rem;
+            letter-spacing: 0.5px;
+            color: #f1f5f9;
+        }
+        .sidebar ul {
+            list-style: none;
+        }
+        .sidebar li {
+            margin-bottom: 0.5rem;
+        }
+        .sidebar a {
+            display: block;
+            padding: 0.6rem 1rem;
+            color: #cbd5e1;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .sidebar a:hover {
+            background: #334155;
+            color: #ffffff;
+        }
+        .sidebar a.active {
+            background: #3b82f6;
+            color: white;
+            font-weight: 600;
+        }
+        /* Main content */
+        .main-content {
+            flex: 1;
+            padding: 2rem 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        /* Block for page-specific CSS */
+        {% block extra_css %}{% endblock %}
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>🎵 Music Explorer</h2>
+        <ul>
+            <li><a href="/" {% if request.path == '/' %}class="active"{% endif %}>Home</a></li>
+            <li><a href="/top-played" {% if request.path == '/top-played' %}class="active"{% endif %}>Top Played</a></li>
+        <!--     <li><a href="/genres" {% if request.path == '/genres' or request.path.startswith('/genre/') %}class="active"{% endif %}>Genres</a></li> </li> -->
+            <li><a href="/essential-albums" {% if request.path == '/essential-albums' %}class="active"{% endif %}>Essential Albums</a></li>
+         <!--    <li><a href="/essential-artists" {% if request.path == '/essential-artists' %}class="active"{% endif %}>Essential Artists</a></li> </li> -->
+            <li><a href="/essential-tracks" {% if request.path == '/essential-tracks' %}class="active"{% endif %}>Essential Tracks</a></li>
+            <li><a href="/playlists" {% if request.path == '/playlists' %}class="active"{% endif %}>Playlists</a></li>
+        </ul>
+    </div>
+    <div class="main-content">
+        {% block content %}{% endblock %}
+    </div>
+		{% block extra_js %}{% endblock %}
+</body>
+</html>

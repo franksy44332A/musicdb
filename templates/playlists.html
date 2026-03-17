@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Playlists{% endblock %}
+
+{% block extra_css %}
+<style>
+    .genre-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+    .genre-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem 1rem;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 1px solid #e2e8f0;
+    }
+    .genre-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px -8px rgba(0,0,0,0.15);
+    }
+    .genre-card a {
+        text-decoration: none;
+        color: #1e293b;
+        font-weight: 600;
+        font-size: 1.2rem;
+    }
+    .genre-card a:hover {
+        color: #3b82f6;
+    }
+    .genre-icon {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 style="color:#0f172a; margin-bottom: 0.5rem;">Your Playlists</h1>
+<p style="color:#475569; margin-bottom: 2rem;">Essential albums by genre. Click a genre to explore.</p>
+
+<div class="genre-grid">
+    {% for genre in genres %}
+    <div class="genre-card">
+        <div class="genre-icon">
+            {% if genre == 'Rock' %}🎸
+            {% elif genre == 'Pop' %}🎤
+            {% elif genre == 'Jazz' %}🎷
+            {% elif genre == 'Dance' %}💃
+            {% elif genre == 'Reggae' %}🇯🇲
+            {% elif genre == 'Metal' %}🤘
+            {% elif genre == 'Ambient' %}🌌
+            {% elif genre == 'Country' %}🤠
+            {% elif genre == 'Soundtrack' %}🎬
+            {% elif genre == 'Hip Hop' %}🎧
+            {% elif genre == 'Soul' %}🎙️
+            {% elif genre == 'Electronic' %}🎛️
+            {% elif genre == 'Classical Music' %}🎻
+            {% elif genre == 'Blues' %}🎸
+            {% elif genre == 'Other' %}🎵
+            {% elif genre == 'Funk' %}🕺
+            {% else %}🎵
+            {% endif %}
+        </div>
+        <a href="/playlists/{{ genre }}">{{ genre }}</a>
+    </div>
+    {% endfor %}
+
+    <!-- Free Jazz / Avant-Garde card -->
+    <div class="genre-card">
+        <div class="genre-icon">🎷🌌</div>
+        <a href="/playlists/free-jazz-avant-garde">Free Jazz / Avant‑Garde</a>
+    </div>
+</div>
+{% endblock %}

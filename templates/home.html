@@ -1,0 +1,491 @@
+{% extends "base.html" %}
+
+{% block title %}Home – Now Playing{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Any home‑specific CSS (keep existing home.html styles except the sidebar and body) */
+    .now-playing-header {
+        background: white;
+        border-radius: 16px;
+        padding: 1.2rem 2rem;
+        margin-bottom: 2.5rem;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        border-left: 6px solid #3b82f6;
+    }
+    .now-playing-header .icon {
+        font-size: 2rem;
+        color: #3b82f6;
+    }
+    .now-playing-header .details {
+        flex: 1;
+    }
+    .now-playing-header .label {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+        margin-bottom: 0.2rem;
+    }
+    .now-playing-header .track-name {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #0f172a;
+    }
+    .now-playing-header .artist-name {
+        font-size: 1rem;
+        color: #475569;
+    }
+    .now-playing-header .timestamp {
+        font-size: 0.85rem;
+        color: #94a3b8;
+        margin-top: 0.3rem;
+    }
+    .album-card {
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 20px 35px -8px rgba(0,0,0,0.15);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+    .album-header {
+        display: flex;
+        gap: 2rem;
+        padding: 2rem;
+        background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .album-cover {
+        flex-shrink: 0;
+        width: 200px;
+        height: 200px;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 12px 25px -8px rgba(0,0,0,0.3);
+        transition: transform 0.2s;
+    }
+    .album-cover:hover {
+        transform: scale(1.02);
+    }
+    .album-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .album-cover .placeholder {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(145deg, #cbd5e1, #94a3b8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 1.2rem;
+    }
+    .album-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .album-info h1 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 0.3rem;
+        line-height: 1.2;
+    }
+    .album-info .artist-link {
+        font-size: 1.2rem;
+        color: #3b82f6;
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 1rem;
+        display: inline-block;
+    }
+    .album-info .artist-link:hover {
+        text-decoration: underline;
+    }
+    .meta-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 0.8rem 1.5rem;
+        margin-top: 0.5rem;
+    }
+    .meta-item {
+        display: flex;
+        flex-direction: column;
+    }
+    .meta-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+    }
+    .meta-value {
+        font-weight: 600;
+        color: #1e293b;
+    }
+    .genres {
+        margin-top: 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    .genre-tag {
+        background: #e2e8f0;
+        color: #334155;
+        padding: 0.25rem 0.75rem;
+        border-radius: 30px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    .tracklist {
+        padding: 1.5rem 2rem;
+    }
+    .tracklist h3 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 1.2rem;
+        color: #0f172a;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .tracklist h3 span {
+        background: #3b82f6;
+        color: white;
+        font-size: 0.9rem;
+        padding: 0.2rem 0.8rem;
+        border-radius: 30px;
+    }
+    .track-header {
+        display: grid;
+        grid-template-columns: 40px 1fr 60px 60px 30px;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        color: #64748b;
+        border-bottom: 1px solid #e2e8f0;
+        margin-bottom: 0.5rem;
+    }
+    .track-row {
+        display: grid;
+        grid-template-columns: 40px 1fr 60px 60px 30px;
+        align-items: center;
+        padding: 0.8rem 1rem;
+        border-radius: 8px;
+        transition: background 0.15s;
+        margin-bottom: 2px;
+    }
+    .track-row:hover {
+        background: #f1f5f9;
+    }
+    .track-row.current {
+        background: #fff7ed;
+        font-weight: 500;
+    }
+    .track-number {
+        color: #94a3b8;
+    }
+    .track-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .track-rating, .track-scrobbles {
+        text-align: right;
+    }
+    .track-rating .star {
+        color: #f59e0b;
+    }
+    .track-scrobbles {
+        color: #3b82f6;
+        font-weight: 500;
+    }
+    .now-playing-indicator {
+        margin-left: 0.5rem;
+        color: #f97316;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+    .no-tracklist {
+        text-align: center;
+        padding: 3rem;
+        color: #94a3b8;
+        font-style: italic;
+    }
+    .refresh-note {
+        text-align: center;
+        font-size: 0.8rem;
+        color: #94a3b8;
+        margin-top: 2rem;
+    }
+    /* External links section */
+    .external-links {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .links-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+        margin-top: 1rem;
+    }
+    .link-button {
+        background: #f1f5f9;
+        color: #334155;
+        padding: 0.5rem 1rem;
+        border-radius: 30px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: background 0.2s;
+        display: inline-block;
+    }
+    .link-button:hover {
+        background: #e2e8f0;
+    }
+    .links-note {
+        color: #64748b;
+        font-size: 0.8rem;
+        margin-top: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <!-- Now playing summary -->
+    <div class="now-playing-header">
+        <div class="icon">🎵</div>
+        <div class="details">
+            <div class="label">
+                {% if status.now_playing %}
+                    NOW PLAYING
+                {% elif status.last_played %}
+                    LAST PLAYED
+                {% else %}
+                    NO RECENT ACTIVITY
+                {% endif %}
+            </div>
+            {% if status.now_playing %}
+                <div class="track-name">{{ status.now_playing.song }}</div>
+                <div class="artist-name">{{ status.now_playing.artist }}</div>
+                <div class="timestamp">Just now</div>
+            {% elif status.last_played %}
+                <div class="track-name">{{ status.last_played.song }}</div>
+                <div class="artist-name">{{ status.last_played.artist }}</div>
+                <div class="timestamp">{{ status.last_played.timestamp }}</div>
+            {% else %}
+                <div class="track-name">—</div>
+                <div class="timestamp">Check back later</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Album section -->
+    {% if album %}
+    <div class="album-card">
+        <div class="album-header">
+            <div class="album-cover">
+                {% if album.image %}
+                    <img src="{{ album.image }}" alt="{{ album.name }}">
+                {% else %}
+                    <div class="placeholder">📀</div>
+                {% endif %}
+            </div>
+            <div class="album-info">
+                <h1>{{ album.name }}</h1>
+                <a href="/artist/{{ album.artist }}" class="artist-link">{{ album.artist }}</a>
+                <div class="meta-grid">
+                    {% if album.Year %}
+                    <div class="meta-item">
+                        <span class="meta-label">Year</span>
+                        <span class="meta-value">{{ album.Year }}</span>
+                    </div>
+                    {% endif %}
+                    {% if album.Release %}
+                    <div class="meta-item">
+                        <span class="meta-label">Label</span>
+                        <span class="meta-value">{{ album.Release }}</span>
+                    </div>
+                    {% endif %}
+                    {% if album.HeadGen %}
+                    <div class="meta-item">
+                        <span class="meta-label">Genre</span>
+                        <span class="meta-value">{{ album.HeadGen }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="genres">
+                    {% set all_genres = [] %}
+                    {% if album.Gen1 and album.Gen1 != 'Blocked' %}{% set _ = all_genres.append(album.Gen1) %}{% endif %}
+                    {% if album.Gen2 and album.Gen2 != 'Blocked' %}{% set _ = all_genres.append(album.Gen2) %}{% endif %}
+                    {% if album.Gen3 and album.Gen3 != 'Blocked' %}{% set _ = all_genres.append(album.Gen3) %}{% endif %}
+                    {% if album.Gen4 and album.Gen4 != 'Blocked' %}{% set _ = all_genres.append(album.Gen4) %}{% endif %}
+                    {% for genre in all_genres[:5] %}
+                    <span class="genre-tag">{{ genre }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="tracklist">
+            <h3>Tracklist 
+                {% if tracks is not none %}
+                    <span>{{ tracks|length }} tracks</span>
+                {% endif %}
+            </h3>
+            {% if tracks %}
+            <div class="track-header">
+                <div>#</div>
+                <div>Title</div>
+                <div class="track-rating">Rating</div>
+                <div class="track-scrobbles">Plays</div>
+                <div></div>
+            </div>
+            {% for track in tracks %}
+            <div class="track-row {% if track.is_current %}current{% endif %}">
+                <div class="track-number">{{ loop.index }}.</div>
+                <div class="track-name" title="{{ track.name }}">{{ track.name }}</div>
+                <div class="track-rating">
+                    {% if track.rating %}
+                        {% if track.rating|int >= 3 %}
+                            <span class="star">★</span> {{ track.rating }}
+                        {% else %}
+                            {{ track.rating }}
+                        {% endif %}
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+                <div class="track-scrobbles">
+                    {% if track.scrobbles and track.scrobbles|int > 0 %}
+                        {{ track.scrobbles }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+                <div class="now-playing-indicator">
+                    {% if track.is_current %}▶{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="no-tracklist">No tracklist available for this album.</div>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div class="album-card" style="padding: 3rem; text-align: center;">
+        <p>No album information available for the current/last played track.</p>
+    </div>
+    {% endif %}
+
+    <!-- Album details section (wiki, playcounts, tags) -->
+    {% if album_details %}
+    <div class="album-details">
+        <h3 style="margin-top: 0; color: #0f172a;">📖 About this album</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+            {% if album_details.release_date %}
+            <div>
+                <span style="color: #64748b; font-size: 0.8rem;">RELEASED</span>
+                <div style="font-weight: 600;">{{ album_details.release_date }}</div>
+            </div>
+            {% endif %}
+            {% if album_details.user_playcount is not none %}
+            <div>
+                <span style="color: #64748b; font-size: 0.8rem;">YOUR PLAYS</span>
+                <div style="font-weight: 600;">{{ album_details.user_playcount }} scrobbles</div>
+            </div>
+            {% endif %}
+            {% if album_details.album_playcount %}
+            <div>
+                <span style="color: #64748b; font-size: 0.8rem;">TOTAL PLAYS</span>
+                <div style="font-weight: 600;">{{ album_details.album_playcount }} scrobbles</div>
+            </div>
+            {% endif %}
+            {% if album_details.listeners %}
+            <div>
+                <span style="color: #64748b; font-size: 0.8rem;">LISTENERS</span>
+                <div style="font-weight: 600;">{{ album_details.listeners }}</div>
+            </div>
+            {% endif %}
+        </div>
+        {% if album_details.wiki_summary %}
+        <div style="margin-top: 1rem; line-height: 1.6; color: #334155;">
+            {{ album_details.wiki_summary|safe }}
+            {% if album_details.wiki_content and album_details.wiki_content != album_details.wiki_summary %}
+            <details style="margin-top: 0.5rem;">
+                <summary style="color: #3b82f6; cursor: pointer;">Read more</summary>
+                <div style="margin-top: 1rem;">{{ album_details.wiki_content|safe }}</div>
+            </details>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% if album_details.tags %}
+        <div style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">
+            {% for tag in album_details.tags[:8] %}
+            <span style="background: #e2e8f0; color: #334155; padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">{{ tag }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- External Links Section (same as album page) -->
+    <div class="external-links">
+        <h3 style="margin-top: 0; color: #0f172a;">🔗 Explore This Album</h3>
+        <div class="links-grid">
+            <!-- Rate Your Music -->
+            <a href="https://rateyourmusic.com/search?searchterm={{ album.artist|urlencode }}+{{ album.name|urlencode }}" target="_blank" class="link-button">Rate Your Music</a>
+            
+            <!-- AllMusic -->
+            <a href="https://www.allmusic.com/search/albums/{{ album.artist|urlencode }}+{{ album.name|urlencode }}" target="_blank" class="link-button">AllMusic</a>
+            
+            <!-- Last.fm -->
+            <a href="https://www.last.fm/music/{{ album.artist|urlencode }}/{{ album.name|urlencode }}" target="_blank" class="link-button">Last.fm</a>
+            
+            <!-- Discogs -->
+            <a href="https://www.discogs.com/search/?q={{ album.artist|urlencode }}+{{ album.name|urlencode }}" target="_blank" class="link-button">Discogs</a>
+            
+            <!-- MusicBrainz -->
+            <a href="https://musicbrainz.org/search?query={{ album.artist|urlencode }}+{{ album.name|urlencode }}&type=release" target="_blank" class="link-button">MusicBrainz</a>
+            
+            <!-- Wikipedia -->
+            <a href="https://en.wikipedia.org/w/index.php?search={{ album.artist|urlencode }}+{{ album.name|urlencode }}" target="_blank" class="link-button">Wikipedia</a>
+            
+            <!-- Google Reviews -->
+            <a href="https://www.google.com/search?q={{ album.artist|urlencode }}+{{ album.name|urlencode }}+review" target="_blank" class="link-button">Google Reviews</a>
+            
+            <!-- YouTube -->
+            <a href="https://www.youtube.com/results?search_query={{ album.artist|urlencode }}+{{ album.name|urlencode }}" target="_blank" class="link-button">YouTube</a>
+            
+            <!-- Bandcamp -->
+            <a href="https://bandcamp.com/search?q={{ album.artist|urlencode }}+{{ album.name|urlencode }}" target="_blank" class="link-button">Bandcamp</a>
+            
+            <!-- SoundCloud -->
+            <a href="https://soundcloud.com/search?q={{ album.artist|urlencode }}+{{ album.name|urlencode }}" target="_blank" class="link-button">SoundCloud</a>
+            
+            <!-- DeepSeek Chat -->
+            <a href="https://chat.deepseek.com/" target="_blank" class="link-button">DeepSeek Chat</a>
+            
+        </div>
+        <p class="links-note">Links open in a new tab. Searches use the artist and album name from the current track. DeepSeek Chat opens the main interface – you can then paste your query.</p>
+    </div>
+
+    <div class="refresh-note">
+        ⏱️ Page auto‑refreshes every 30 seconds
+    </div>
+
+    <script>
+        setInterval(function() {
+            location.reload();
+        }, 30000);
+    </script>
+{% endblock %}

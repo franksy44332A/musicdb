@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block title %}Essential Albums{% endblock %}
+
+{% block extra_css %}
+<!-- DataTables CSS -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<style>
+    body { background: #f8fafc; }
+    .dataTables_wrapper {
+        font-family: 'Inter', sans-serif;
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+        margin-top: 1rem;
+    }
+    table.dataTable {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 0.9rem;
+        margin-top: 1rem !important;
+    }
+    table.dataTable thead th {
+        background-color: #f1f5f9;
+        color: #1e293b;
+        font-weight: 600;
+        border-bottom: 2px solid #cbd5e1;
+        padding: 12px 8px;
+        white-space: nowrap;
+    }
+    table.dataTable tbody td {
+        padding: 10px 8px;
+        border-bottom: 1px solid #e2e8f0;
+        color: #334155;
+        white-space: nowrap;
+    }
+    table.dataTable tbody tr:hover {
+        background-color: #f1f5f9;
+    }
+    /* Filter bar (above table) */
+    .filter-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 20px;
+        background: white;
+        padding: 15px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .filter-item {
+        flex: 1 0 150px;
+        min-width: 140px;
+    }
+    .filter-item label {
+        display: block;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        color: #64748b;
+        margin-bottom: 2px;
+    }
+    .filter-item input {
+        width: 100%;
+        padding: 6px 8px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        background: white;
+        transition: border-color 0.15s;
+    }
+    .filter-item input:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+    }
+    .loading {
+        text-align: center;
+        padding: 3rem;
+        color: #94a3b8;
+        font-size: 1.2rem;
+    }
+    .loading::after {
+        content: "⏳";
+        animation: spin 1s linear infinite;
+        display: inline-block;
+        margin-left: 8px;
+    }
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    .dataTables_filter { display: none; }
+    .dataTables_length { margin-bottom: 1rem; }
+    .dataTables_info, .dataTables_paginate { margin-top: 1rem; }
+    .dataTables_paginate .paginate_button {
+        border-radius: 6px;
+        padding: 6px 12px;
+        margin: 0 2px;
+    }
+    .dataTables_paginate .paginate_button.current {
+        background: #3b82f6;
+        color: white !important;
+        border: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 style="color:#0f172a; margin-bottom: 0.5rem;">Essential Albums</h1>
+<p style="color:#475569; margin-bottom: 2rem;">Albums marked as essential (fullAlbum = EA). Use the filters to narrow down.</p>
+
+<div id="loading" class="loading">Loading data...</div>
+
+<!-- Filter bar -->
+<div id="filterBar" class="filter-bar" style="display: none;"></div>
+
+<table id="albumTable" class="display" style="width:100%; display: none;">
+    <thead>
+        <tr>
+            <th>Artist</th>
+            <th>Album</th>
+            <th>HeadGen</th>
+            <th>Gen1</th>
+            <th>Gen2</th>
+            <th>Gen3</th>
+            <th>Gen4</th>
+            <th>Album Rating</th>
+            <th>Release</th>
+        </tr>
+    </thead>
+</table>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    var loading = $('#loading');
+    var tableElement = $('#albumTable');
+    var filterBar = $('#filterBar');
+    var startTime = performance.now();
+
+    loading.show();
+    tableElement.hide();
+    filterBar.hide();
+
+    var columns = [
+        'Artist', 'Album', 'HeadGen', 'Gen1', 'Gen2', 'Gen3', 'Gen4',
+        'Album Rating', 'Release'
+    ];
+
+    // Build filter inputs
+    columns.forEach(function(col, index) {
+        var div = $('<div class="filter-item"></div>');
+        div.append('<label>' + col + '</label>');
+        var input = $('<input type="text" placeholder="Filter...">');
+        input.attr('data-column', index);
+        div.append(input);
+        filterBar.append(div);
+    });
+
+    // Initialize DataTable
+    var table = $('#albumTable').DataTable({
+        ajax: {
+            url: '/api/essential-albums',
+            dataSrc: function(json) {
+                console.log("AJAX received", json.length, "albums in", (performance.now() - startTime).toFixed(0), "ms");
+                return json;
+            },
+            error: function(xhr, status, error) {
+                console.error("AJAX error:", status, error);
+                loading.html('Error loading data. Check console.');
+            }
+        },
+       columns: [
+			{ 
+				data: 'Artist', 
+				render: function(data, type, row) {
+					if (type === 'display') {
+						var artist = encodeURIComponent(data);
+						return '<a href="/artist/' + artist + '">' + data + '</a>';
+					}
+					return data;
+				}
+			},
+			{ 
+				data: 'Album',
+				render: function(data, type, row) {
+					if (type === 'display') {
+						var artist = encodeURIComponent(row.Artist);
+						var album = encodeURIComponent(data);
+						return '<a href="/album/' + artist + '/' + album + '">' + data + '</a>';
+					}
+					return data;
+				}
+			},
+			{ data: 'HeadGen' },
+			{ data: 'Gen1' },
+			{ data: 'Gen2' },
+			{ data: 'Gen3' },
+			{ data: 'Gen4' },
+			{ data: 'albumRating' },
+			{ data: 'Release' }
+		],
+        order: [[0, 'asc']],
+        pageLength: 25,
+        lengthMenu: [10, 25, 50, 100],
+        scrollX: true,
+        deferRender: true,
+        initComplete: function() {
+            loading.hide();
+            tableElement.show();
+            filterBar.show();
+            console.log("Table ready.");
+
+            $('.filter-item input').on('keyup change', function() {
+                var colIndex = $(this).data('column');
+                var val = $(this).val();
+                table.column(colIndex).search(val).draw();
+            });
+        }
+    });
+});
+</script>
+{% endblock %}
