@@ -10,6 +10,8 @@ import pylast
 from datetime import datetime
 import time
 
+# Fixed indentation in index route
+
 # Simple in-memory cache for now playing
 now_playing_cache = {'data': None, 'timestamp': 0}
 CACHE_DURATION = 30  # seconds
