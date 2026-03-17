@@ -34,5 +34,32 @@
 			["Tony Oxley", "4 Compositions for Sextet"],
 			["Alan Silva and His Celestrial Communication Orchestra Actuel", "Luna Surface"]
 		]
+	},
+	{
+		"slug": "spiritual-jazz-essentials",
+		"title": "20 Spiritual Jazz Albums",
+		"description": "A selection of essential spiritual jazz records.",
+		"albums": [
+			["Joe Henderson featuring Alice Coltrane", "The Elements"],
+			["Pharoah Sanders", "Deaf Dumb Blind (Summun bukmun umyun)"],
+			["McCoy Tyner", "Echoes of a Friend"],
+			["Billy Harper", "Black Saint"],
+			["Maurice McIntyre", "Humility in the Light of Creator"],
+			["Sun Ra", "God Is More Than Love Can Ever Be"],
+			["Arthur Blythe", "Illusions"],
+			["Kamasi Washington", "The Epic"],
+			["Sonny Sharrock", "Black Woman"],
+			["Steve Reid featuring The Legendary Master Brotherhood", "Nova"],
+			["Rahsaan Roland Kirk", "Prepare Thyself to Deal With a Miracle"],
+			["Alice Coltrane With Strings", "World Galaxy"],
+			["Randy Weston", "The Spirits of Our Ancestors"],
+			["Archie Shepp & Horace Parlan", "Goin' Home"],
+			["Tohru Aizawa Quartet", "Tachibana, Vol. 1"],
+			["Don Cherry", "Organic Music Society"],
+			["Dresch Dudás Mihály Quartet", "Gondolatok a régiekről"],
+			["John Coltrane", "Sun Ship"],
+			["Faruq Z. Bey with Northwoods Improvisers", "Rwanda"],
+			["Horace Tapscott with The Pan Afrikan Peoples Arkestra", "Ancestral Echoes: The Covina Sessions, 1976"]
+		]
 	}
 ]
