@@ -541,8 +541,7 @@ def inject_request():
 # ----- Routes -----
 @app.route('/')
 def index():
-    # Get now playing directly from Last.fm
-         current_time = time.time()
+    current_time = time.time()
     # Use cache if fresh
     if current_time - now_playing_cache['timestamp'] < CACHE_DURATION:
         current_track = now_playing_cache['data']
