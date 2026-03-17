@@ -1,0 +1,5 @@
+*.db-shm 
+*.db-wal 
+now_playing.json 
+__pycache__/ 
+*.pyc 
