@@ -2,7 +2,7 @@
 	{
 		"slug": "cool-jazz-essentials-2",
 		"title": "Seven Cool Jazz Albums",
-		"description": "A selection of essential cool jazz records.",
+		"description": "A selection of very cool jazz records.",
 		"albums": [
 			["Gerry Mulligan", "Night Lights"],
 			["Jimmy Giuffre", "Western Suite"],
@@ -11,6 +11,28 @@
 			["Miles Davis", "Blue Moods"],
 			["David Murray", "Ballads"],
 			["Lars Jansson Trio", "A Window Towards Being"]
+		]
+	},
+	{
+		"slug": "european-free-jazz-essentials",
+		"title": "15 European Free Jazz Albums",
+		"description": "A selection of essential European free jazz records.",
+		"albums": [
+			["Mario Schiano Trio ‎", "If Not Ecstatic We Refund"],
+			["François Tusques", "Free Jazz"],
+			["Han Bennink + Willem Breuker", "New Acoustic Swing Duo"],
+			["Howard Riley", "Synopsis"],
+			["Peter Kowald Quintet", "Peter Kowald Quintet"],
+			["Rüdiger Carl", "King Alcohol"],
+			["Schweizer / Carl / Moholo", "Messer"],
+			["Tom Prehn Kvartet", "Axiom"],
+			["Tomasz Stańko Polish Jazz", "TWET"],
+			["The Peter Brötzmann Sextet/Quartet", "Nipples"],
+			["Manfred Schoof", "European Echoes"],
+			["Alexander von Schlippenbach", "Globe Unity"],
+			["Sven-Åke Johansson", "Schlingerland / Dynamische Schwingungen"],
+			["Tony Oxley", "4 Compositions for Sextet"],
+			["Alan Silva and His Celestrial Communication Orchestra Actuel", "Luna Surface"]
 		]
 	}
 ]
