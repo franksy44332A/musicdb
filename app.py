@@ -8,6 +8,11 @@ from urllib.parse import quote
 import time
 import pylast
 from datetime import datetime
+import time
+
+# Simple in-memory cache for now playing
+now_playing_cache = {'data': None, 'timestamp': 0}
+CACHE_DURATION = 30  # seconds
 
 app = Flask(__name__)
 
@@ -537,38 +542,47 @@ def inject_request():
 @app.route('/')
 def index():
     # Get now playing directly from Last.fm
-    now_playing_track = None
-    try:
-        now_playing_track = user.get_now_playing()
-    except Exception as e:
-        print(f"Error fetching now playing: {e}")
-
-    # If nothing playing, get most recent scrobble
-    recent_tracks = []
-    try:
-        recent_tracks = user.get_recent_tracks(limit=1)
-    except Exception as e:
-        print(f"Error fetching recent tracks: {e}")
-
-    if now_playing_track:
-        current_track = {
-            'artist': now_playing_track.artist.name,
-            'song': now_playing_track.title,
-            'album': now_playing_track.get_album().get_name() if now_playing_track.get_album() else None,
-            'timestamp': 'Now',
-            'is_now_playing': True
-        }
-    elif recent_tracks:
-        track = recent_tracks[0]
-        current_track = {
-            'artist': track.track.artist.name,
-            'song': track.track.title,
-            'album': track.track.get_album().get_name() if track.track.get_album() else None,
-            'timestamp': track.playback_date,
-            'is_now_playing': False
-        }
+     current_time = time.time()
+    # Use cache if fresh
+    if current_time - now_playing_cache['timestamp'] < CACHE_DURATION:
+        current_track = now_playing_cache['data']
     else:
-        current_track = None
+        # Fetch fresh data
+        now_playing_track = None
+        try:
+            now_playing_track = user.get_now_playing()
+        except Exception as e:
+            print(f"Error fetching now playing: {e}")
+
+        recent_tracks = []
+        try:
+            recent_tracks = user.get_recent_tracks(limit=1)
+        except Exception as e:
+            print(f"Error fetching recent tracks: {e}")
+
+        if now_playing_track:
+            current_track = {
+                'artist': now_playing_track.artist.name,
+                'song': now_playing_track.title,
+                'album': now_playing_track.get_album().get_name() if now_playing_track.get_album() else None,
+                'timestamp': 'Now',
+                'is_now_playing': True
+            }
+        elif recent_tracks:
+            track = recent_tracks[0]
+            current_track = {
+                'artist': track.track.artist.name,
+                'song': track.track.title,
+                'album': track.track.get_album().get_name() if track.track.get_album() else None,
+                'timestamp': track.playback_date,
+                'is_now_playing': False
+            }
+        else:
+            current_track = None
+
+        # Update cache
+        now_playing_cache['data'] = current_track
+        now_playing_cache['timestamp'] = current_time
 
     if not current_track:
         return render_template('home.html', album=None, tracks=[], current_track=None, status={'now_playing': None, 'last_played': None})
@@ -836,6 +850,11 @@ def playlists():
 def curated_index():
     """Show list of all curated recommendation posts."""
     return render_template('curated_index.html', lists=curated_lists)
+    
+@app.route('/health')
+def health():
+    """Simple health check endpoint for Render."""
+    return "OK", 200
 
 @app.route('/curated/<slug>')
 def curated_list(slug):
